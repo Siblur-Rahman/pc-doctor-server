@@ -24,7 +24,7 @@ async function run() {
   try {
     // service
     const servicesCollection = client.db('pc-doctor').collection('services')
-    // const usersCollection = client.db('pc-doctor').collection('users')
+    const usersCollection = client.db('pc-doctor').collection('users')
 
 
     // services
@@ -41,7 +41,23 @@ async function run() {
 
       res.send(resul)
     })
-
+    
+    app.post('/service', async (req, res) =>{
+      const serviceData = req.body
+        const result = await servicesCollection.insertOne(serviceData);
+        res.send(result)
+      })
+    // user
+    app.post('/signup', async (req, res) => {
+      const userData = req.body
+      const query = { email: userData.email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists", insertedId: null });
+      }
+      const result = await usersCollection.insertOne(userData)
+      res.send(result)
+    })
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
