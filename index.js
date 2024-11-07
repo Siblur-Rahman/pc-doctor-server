@@ -24,6 +24,7 @@ async function run() {
   try {
     // service
     const servicesCollection = client.db('pc-doctor').collection('services')
+    const bookingCollection = client.db('pc-doctor').collection('booking')
     const usersCollection = client.db('pc-doctor').collection('users')
 
 
@@ -47,6 +48,45 @@ async function run() {
         const result = await servicesCollection.insertOne(serviceData);
         res.send(result)
       })
+      app.put('/updateservice/:id', async (req, res) => {
+        const id = req.params.id;
+        const serviceData = req.body;
+        const query = { _id: new ObjectId(id) };
+        const data = {
+          $set:{
+            ...serviceData
+          }
+        }
+        const result = await servicesCollection.updateOne(query, data)
+        console.log(result)
+        res.send(result)
+          })
+      app.get('/manageservices/:email', async (req, res) => {
+        const email = req.params.email
+        const query = { 'providerEmail': email }
+        const result = await servicesCollection.find(query).toArray()
+        res.send(result)
+      })
+      app.delete('/deleteservice/:id', async(req, res)=>{
+        const id = req.params.id;
+        console.log(id)
+        const query = {_id: new ObjectId(id)}
+        const result = await servicesCollection.deleteOne(query);
+        console.log(result)
+        res.send(result)
+      })
+      // bookingServices
+      app.post('/bookedservice', async (req, res) =>{
+          const serviceData = req.body
+          const result = await bookingCollection.insertOne(serviceData);
+          res.send(result)
+        })
+        app.get('/mybookedservices/:email', async (req, res) => {
+          const email = req.params.email
+          const query = { 'userName': email }
+          const result = await bookingCollection.find(query).toArray()
+          res.send(result)
+        })
     // user
     app.post('/signup', async (req, res) => {
       const userData = req.body
