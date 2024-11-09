@@ -81,9 +81,28 @@ async function run() {
           const result = await bookingCollection.insertOne(serviceData);
           res.send(result)
         })
+        app.patch('/bookedservice/:id', async (req, res) => {
+          const id = req.params.id;
+          const status = req.body.status;
+          const query = { _id: new ObjectId(id) };
+          const data = {
+            $set:{
+              status:status
+            }
+          }
+          const result = await bookingCollection.updateOne(query, data)
+          console.log(result)
+          res.send(result)
+            })
         app.get('/mybookedservices/:email', async (req, res) => {
           const email = req.params.email
           const query = { 'userEmail': email }
+          const result = await bookingCollection.find(query).toArray()
+          res.send(result)
+        })
+        app.get('/servicestodo/:email', async (req, res) => {
+          const email = req.params.email
+          const query = { 'providerEmail': email }
           const result = await bookingCollection.find(query).toArray()
           res.send(result)
         })
