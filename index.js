@@ -58,9 +58,27 @@ async function run() {
           }
         }
         const result = await servicesCollection.updateOne(query, data)
-        console.log(result)
         res.send(result)
           })
+
+
+          app.patch('/bookingCount/:id', async (req, res) => {
+            const id = req.params.id;
+            // const newBookingCount = req.body.booking;
+            // console.log(newBookingCount)
+            const query = { _id: new ObjectId(id) };
+            const servic = await servicesCollection.findOne(query);
+            let newBookingCount = parseFloat(servic?.bookingCount);
+            newBookingCount++;
+            const data = {
+              $set:{
+                bookingCount:newBookingCount
+              }
+            }
+            const result = await servicesCollection.updateOne(query, data)
+            console.log(result)
+            res.send(result)
+              })
       app.get('/manageservices/:email', async (req, res) => {
         const email = req.params.email
         const query = { 'providerEmail': email }
