@@ -60,12 +60,33 @@ async function run() {
         const result = await servicesCollection.updateOne(query, data)
         res.send(result)
           })
+          app.get("/topprovider", async (req, res) => {
+            try {
+              const result = await usersCollection
+                .find()
+                .sort({ createCount: -1 })
+                .limit(3)
+                .toArray();
+              res.send(result);
+            } catch (error) {
+              res.status(500).json({ error: "Failed to fetch and sort service" });
+            }
+          });
 
-
+          app.get("/populerservices6", async (req, res) => {
+            try {
+              const result = await servicesCollection
+                .find()
+                .sort({ bookingCount: -1 })
+                .limit(6)
+                .toArray();
+              res.send(result);
+            } catch (error) {
+              res.status(500).json({ error: "Failed to fetch and sort data" });
+            }
+          });
           app.patch('/bookingCount/:id', async (req, res) => {
             const id = req.params.id;
-            // const newBookingCount = req.body.booking;
-            // console.log(newBookingCount)
             const query = { _id: new ObjectId(id) };
             const servic = await servicesCollection.findOne(query);
             let newBookingCount = parseFloat(servic?.bookingCount);
@@ -135,6 +156,8 @@ async function run() {
       const result = await usersCollection.insertOne(userData)
       res.send(result)
     })
+
+    
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
