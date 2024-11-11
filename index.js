@@ -6,7 +6,18 @@ const cors = require('cors')
 require('dotenv').config()
 const port = 3000
 
-app.use(cors())
+// middleware
+app.use(
+  cors({
+    origin: ["http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "https://pc-doctor-23d5f.web.app",
+      "https://pc-doctor-23d5f.firebaseapp.com"
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ts8x6gb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -35,6 +46,20 @@ async function run() {
       res.send(resul)
     })
 
+    // Search contest based on Type/Tag
+    app.get("/service/search/:text", async (req, res) => {
+      const text = req.params.text;
+
+      try {
+        const searchResults = await servicesCollection
+          .find({ service_name: { $regex: text, $options: "i" } })
+         
+          .toArray();
+        res.json(searchResults);
+      } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
     // single service
     app.get('/service/:id', async(req, res) =>{
     
@@ -60,7 +85,8 @@ async function run() {
         const result = await servicesCollection.updateOne(query, data)
         res.send(result)
           })
-          app.get("/topprovider", async (req, res) => {
+
+          app.get("/topprovider3", async (req, res) => {
             try {
               const result = await usersCollection
                 .find()
@@ -72,7 +98,22 @@ async function run() {
               res.status(500).json({ error: "Failed to fetch and sort service" });
             }
           });
-
+          // createCount
+          app.patch('/createCount', async (req, res) => {
+            const userEmail = req.body
+            const query = { email: userEmail.email };
+            const user = await usersCollection.findOne(query);
+            let newCreateCount = parseFloat(user?.createCount);
+            newCreateCount++;
+            const data = {
+              $set:{
+                createCount:newCreateCount
+              }
+            }
+            const result = await usersCollection.updateOne(query, data)
+            console.log(result)
+            res.send(result)
+        })
           app.get("/populerservices6", async (req, res) => {
             try {
               const result = await servicesCollection
